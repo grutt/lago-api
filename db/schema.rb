@@ -158,7 +158,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_04_03_084644) do
 
   create_table "cached_aggregations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "organization_id", null: false
-    t.uuid "event_id", null: false
+    t.uuid "event_id"
     t.datetime "timestamp", null: false
     t.string "external_subscription_id", null: false
     t.uuid "charge_id", null: false
