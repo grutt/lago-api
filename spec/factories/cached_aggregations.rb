@@ -7,5 +7,9 @@ FactoryBot.define do
     event_id { SecureRandom.uuid }
     external_subscription_id { SecureRandom.uuid }
     timestamp { Time.current }
+
+    trait :without_event do
+      event_id { nil }
+    end
   end
 end

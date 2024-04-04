@@ -16,7 +16,9 @@ module BillableMetrics
           .joins(plan: :subscriptions).pluck('subscriptions.id'),
       ).update_all(deleted_at:) # rubocop:disable Rails/SkipsModelValidations
 
-      metric.quantified_events.update_all(deleted_at:) # rubocop:disable Rails/SkipsModelValidations
+      CachedAggregation
+        .where(charge_id: Charge.with_discarded.where(billable_metric_id: metric.id).select(:id))
+        .delete_all
     end
   end
 end

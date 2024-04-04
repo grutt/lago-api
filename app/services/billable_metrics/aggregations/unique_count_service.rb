@@ -139,13 +139,6 @@ module BillableMetrics
         query.first
       end
 
-      def count_unique_group_scope(events)
-        events = events.where('quantified_events.properties @> ?', { group.key.to_s => group.value }.to_json)
-        return events unless group.parent
-
-        events.where('quantified_events.properties @> ?', { group.parent.key.to_s => group.parent.value }.to_json)
-      end
-
       protected
 
       def operation_type

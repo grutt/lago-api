@@ -237,21 +237,21 @@ module Fees
       # NOTE: Only weighted sum aggregation is setting this value
       return unless aggregation_results.first&.recurring_updated_at
 
-      result.quantified_events ||= []
+      result.cached_aggregations ||= []
 
       # NOTE: persist current recurring value for next period
       aggregation_results.each do |aggregation_result|
-        result.quantified_events << QuantifiedEvent.find_or_initialize_by(
+        result.cached_aggregations << CachedAggregation.find_or_initialize_by(
           organization_id: billable_metric.organization_id,
           external_subscription_id: subscription.external_id,
           group_id: group&.id,
           charge_filter_id: charge_filter&.id,
-          billable_metric_id: billable_metric.id,
-          added_at: aggregation_result.recurring_updated_at,
+          charge_id: charge.id,
+          timestamp: aggregation_result.recurring_updated_at,
           grouped_by: aggregation_result.grouped_by || {},
-        ) do |event|
-          event.properties[QuantifiedEvent::RECURRING_TOTAL_UNITS] = aggregation_result.total_aggregated_units
-          event.save!
+        ) do |cache|
+          cache.current_aggregation = aggregation_result.total_aggregated_units
+          cache.save!
         end
       end
     end

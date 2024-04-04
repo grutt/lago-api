@@ -124,17 +124,19 @@ RSpec.describe BillableMetrics::Aggregations::WeightedSumService, type: :service
 
     let(:events_values) { [] }
 
-    let(:quantified_event) do
+    let(:cached_aggregation) do
       create(
-        :quantified_event,
-        billable_metric:,
+        :cached_aggregation,
+        :without_event,
+        organization:,
+        charge:,
         external_subscription_id: subscription.external_id,
-        added_at: from_datetime - 1.day,
-        properties: { QuantifiedEvent::RECURRING_TOTAL_UNITS => 1000 },
+        timestamp: from_datetime - 1.day,
+        current_aggregation: 1000,
       )
     end
 
-    before { quantified_event }
+    before { cached_aggregation }
 
     it 'uses the persisted recurring value as initial value' do
       result = aggregator.aggregate
@@ -146,8 +148,8 @@ RSpec.describe BillableMetrics::Aggregations::WeightedSumService, type: :service
       expect(result.recurring_updated_at).to eq(from_datetime)
     end
 
-    context 'without quantified events' do
-      let(:quantified_event) {}
+    context 'without cached aggregation' do
+      let(:cached_aggregation) {}
 
       it 'falls back on 0' do
         result = aggregator.aggregate
@@ -333,29 +335,33 @@ RSpec.describe BillableMetrics::Aggregations::WeightedSumService, type: :service
 
       let(:events_values) { [] }
 
-      let(:quantified_events) do
+      let(:cached_aggregations) do
         [
           create(
-            :quantified_event,
-            billable_metric:,
+            :cached_aggregation,
+            :without_event,
+            organization:,
+            charge:,
             external_subscription_id: subscription.external_id,
-            added_at: from_datetime - 1.day,
-            properties: { QuantifiedEvent::RECURRING_TOTAL_UNITS => '1000' },
+            timestamp: from_datetime - 1.day,
+            current_aggregation: 1000,
             grouped_by: { 'agent_name' => 'aragorn' },
           ),
 
           create(
-            :quantified_event,
-            billable_metric:,
+            :cached_aggregation,
+            :without_event,
+            organization:,
+            charge:,
             external_subscription_id: subscription.external_id,
-            added_at: from_datetime - 1.day,
-            properties: { QuantifiedEvent::RECURRING_TOTAL_UNITS => '1000' },
+            timestamp: from_datetime - 1.day,
+            current_aggregation: 1000,
             grouped_by: { 'agent_name' => 'frodo' },
           ),
         ]
       end
 
-      before { quantified_events }
+      before { cached_aggregations }
 
       it 'uses the persisted recurring value as initial value' do
         result = aggregator.aggregate
@@ -372,8 +378,8 @@ RSpec.describe BillableMetrics::Aggregations::WeightedSumService, type: :service
         end
       end
 
-      context 'without quantified events' do
-        let(:quantified_events) {}
+      context 'without cached aggregation' do
+        let(:cached_aggregations) {}
 
         it 'returns an empty result' do
           result = aggregator.aggregate
